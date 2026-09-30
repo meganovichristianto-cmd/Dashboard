@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RUNA Wellness Centre - Executive Project Management Dashboard</title>
+  <meta name="description" content="Dashboard Executive Helicopter View Rencana Peluncuran Produk Maklon RUNA Wellness Centre bersama PT Agro Sehat Nusantara.">
+  
+  <!-- Google Fonts: Cormorant Garamond (Serif Runa) & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top App Navigation Bar (RUNA Brand Styling) -->
+  <header class="app-header">
+    <div class="header-container">
+      
+      <!-- Brand Logo - User Uploaded Image -->
+      <div class="runa-logo-brand">
+        <div class="logo-image-wrapper">
+          <img src="runa-logo.jpg" alt="RUNA Wellness Centre Logo" class="runa-logo-img">
+        </div>
+
+        <div class="runa-header-text">
+          <h1>EXECUTIVE DASHBOARD</h1>
+          <p>Product Release Timeline & Contract Manufacturing Roadmap</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <button id="btnExportData" class="btn btn-outline-runa btn-sm" title="Export data ke format JSON">
+          <i class="fas fa-download"></i> Export JSON
+        </button>
+        <button id="btnImportData" class="btn btn-outline-runa btn-sm" title="Import file JSON data">
+          <i class="fas fa-upload"></i> Import JSON
+        </button>
+        <button id="btnResetData" class="btn btn-outline-runa btn-sm" style="opacity:0.75;" title="Reset ke data awal">
+          <i class="fas fa-undo"></i> Reset
+        </button>
+        <button id="btnAddProduct" class="btn btn-runa-blush btn-sm">
+          <i class="fas fa-plus-circle"></i> Tambah Produk
+        </button>
+        <input type="file" id="fileImportInput" accept=".json" style="display:none;">
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="main-layout">
+
+    <!-- Executive Decision Helper Banner -->
+    <section class="decision-banner">
+      <div class="decision-content">
+        <h3><i class="fas fa-gavel"></i> Perlu Keputusan & Persetujuan Owner (Decision Required)</h3>
+        <p>Produk-produk berikut memerlukan persetujuan nama baru / rebranding atau varian sediaan dari Owner agar pendaftaran BPOM TR & Halal dapat segera berjalan secara paralel:</p>
+        <div id="decisionTagsContainer" class="decision-tags">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+      <div>
+        <button class="btn btn-runa-primary btn-sm" onclick="document.querySelector('[data-tab=\'kanban\']').click()">
+          <i class="fas fa-columns"></i> Lihat Kanban Board
+        </button>
+      </div>
+    </section>
+
+    <!-- KPI Summary Grid -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title">Total Portfolio</span>
+          <div class="kpi-icon blush"><i class="fas fa-boxes-stacked"></i></div>
+        </div>
+        <div id="kpiTotalProducts" class="kpi-value">12</div>
+        <div class="kpi-subtext">Produk Maklon Dalam Pipeline</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title">Wave 1 (Quick Wins)</span>
+          <div class="kpi-icon taupe"><i class="fas fa-bolt"></i></div>
+        </div>
+        <div id="kpiWave1Count" class="kpi-value">7</div>
+        <div class="kpi-subtext">Peluncuran Tercepat (Bahan Ready)</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title">Kendala / High Risk</span>
+          <div class="kpi-icon rose"><i class="fas fa-exclamation-triangle"></i></div>
+        </div>
+        <div id="kpiHighRiskCount" class="kpi-value">3</div>
+        <div class="kpi-subtext">Butuh Atensi R&D / Supplier Pihak 3</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title">Overall Portfolio Progress</span>
+          <div class="kpi-icon amber"><i class="fas fa-chart-line"></i></div>
+        </div>
+        <div id="kpiAvgProgress" class="kpi-value">38%</div>
+        <div class="kpi-subtext">Calculated Sub-Task Score</div>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <nav class="tabs-header">
+      <button class="tab-btn active" data-tab="helicopter">
+        <i class="fas fa-helicopter"></i> 1. Helicopter Matrix
+      </button>
+      <button class="tab-btn" data-tab="kanban">
+        <i class="fas fa-columns"></i> 2. Kanban Stage Board
+      </button>
+      <button class="tab-btn" data-tab="gantt">
+        <i class="fas fa-stream"></i> 3. Gantt Timeline
+      </button>
+      <button class="tab-btn" data-tab="risk">
+        <i class="fas fa-shield-halved"></i> 4. Risk & Bottlenecks
+      </button>
+    </nav>
+
+    <!-- Filter & Control Bar -->
+    <section class="control-bar">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" class="search-input" placeholder="Cari nama produk, kode, atau kendala...">
+      </div>
+
+      <div class="filter-group">
+        <select id="filterWave" class="select-filter">
+          <option value="all">Semua Wave (Peluncuran)</option>
+          <option value="wave1">Wave 1 (Quick Wins)</option>
+          <option value="wave2">Wave 2 (Mid-Term)</option>
+          <option value="wave3">Wave 3 (Long-Term R&D)</option>
+        </select>
+
+        <select id="filterPic" class="select-filter">
+          <option value="all">Semua PIC / Penanggung Jawab</option>
+          <option value="pt_agro">PT Agro Sehat Nusantara</option>
+          <option value="pihak_3">Supplier Pihak Ke-3</option>
+          <option value="pt_runa">Internal RUNA Wellness</option>
+          <option value="joint">Joint Team</option>
+        </select>
+
+        <select id="filterRisk" class="select-filter">
+          <option value="all">Semua Risk Level</option>
+          <option value="low">Low Risk</option>
+          <option value="medium">Medium Risk</option>
+          <option value="high">High Risk</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- TAB 1: HELICOPTER VIEW MATRIX -->
+    <div id="tab-helicopter" class="tab-pane active">
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fas fa-th-list"></i> Matriks Overview Produk Maklon RUNA</h2>
+          <span style="font-size:12.5px; color:var(--runa-muted);">Standard Durasi: BPOM TR (6 Bln), Halal (3 Bln), Lab (2 Bln), Riset (3-4 Wks)</span>
+        </div>
+        
+        <div class="product-table-wrapper">
+          <table class="product-table">
+            <thead>
+              <tr>
+                <th>Nama Produk & Sub-Task</th>
+                <th>Kategori Wave</th>
+                <th>PIC / Penanggung Jawab</th>
+                <th>Tahap Saat Ini</th>
+                <th>Progress (%)</th>
+                <th>Status Risiko</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="helicopterTableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: KANBAN BOARD -->
+    <div id="tab-kanban" class="tab-pane">
+      <div class="kanban-board" id="kanbanBoard">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- TAB 3: GANTT TIMELINE -->
+    <div id="tab-gantt" class="tab-pane">
+      <div id="ganttTimelineContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- TAB 4: RISK & BOTTLENECK MATRIX -->
+    <div id="tab-risk" class="tab-pane">
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fas fa-triangle-exclamation"></i> Log Remediasi Kendala & Root Cause</h2>
+          <p style="font-size:13px; color:var(--runa-muted);">Detail akar masalah (root cause), rencana tindakan (action plan), dan status penanganan kendala produk.</p>
+        </div>
+        <div id="riskMatrixContainer">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Expanded Tabbed Modal Drawer for Sub-Tasks & Bottleneck Logs -->
+  <div id="productModal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle"><i class="fas fa-box-open"></i> Detail & Checklist Produk</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+
+      <!-- Modal Sub Navigation Tabs -->
+      <nav class="modal-tabs">
+        <button type="button" class="modal-tab-btn active" data-pane="subtasks">
+          <i class="fas fa-tasks"></i> 1. Checklist & Deadline Sub-Task
+        </button>
+        <button type="button" class="modal-tab-btn" data-pane="bottlenecks">
+          <i class="fas fa-exclamation-circle"></i> 2. Log Remediasi Kendala
+        </button>
+        <button type="button" class="modal-tab-btn" data-pane="general">
+          <i class="fas fa-sliders"></i> 3. Pengaturan General & PM Notes
+        </button>
+      </nav>
+      
+      <form id="productForm">
+        <div class="modal-body">
+          <input type="hidden" id="prodId">
+
+          <!-- MODAL PANE 1: SUB-TASK CHECKLIST & MANUAL DEADLINES -->
+          <div id="modal-pane-subtasks" class="modal-pane active">
+            <div class="subtasks-header">
+              <h4 style="font-size:15px; color:var(--runa-taupe-dark);"><i class="fas fa-list-check"></i> Daftar Sub-Task & Tanggal Target Selesai</h4>
+              <span style="font-size:12px; color:var(--runa-muted);">Centang untuk otomatis menambah % progress</span>
+            </div>
+
+            <div id="subtaskListContainer" class="subtask-list">
+              <!-- Rendered dynamically -->
+            </div>
+
+            <div class="add-subtask-box">
+              <input type="text" id="newSubtaskTitle" class="form-input" placeholder="+ Tambah sub-task / milestone baru..." style="flex:2;">
+              <input type="date" id="newSubtaskDate" class="form-input" style="flex:1;" value="2026-10-25">
+              <select id="newSubtaskPic" class="form-select" style="flex:1;">
+                <option value="pt_agro">PT Agro</option>
+                <option value="pihak_3">Pihak 3</option>
+                <option value="pt_runa">Internal RUNA</option>
+                <option value="joint">Joint Team</option>
+              </select>
+              <button type="button" id="btnAddSubtask" class="btn btn-runa-primary btn-sm">
+                <i class="fas fa-plus"></i> Tambah
+              </button>
+            </div>
+          </div>
+
+          <!-- MODAL PANE 2: BOTTLENECK & ROOT CAUSE LOG -->
+          <div id="modal-pane-bottlenecks" class="modal-pane">
+            <div class="form-group">
+              <label class="form-label" for="prodBottleneck">Ringkasan Kendala (Bottleneck Summary)</label>
+              <input type="text" id="prodBottleneck" class="form-input" placeholder="Contoh: Formulasi filler tablet hisap kurang padat">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="logRootCause">Akar Masalah (Root Cause)</label>
+              <textarea id="logRootCause" class="form-textarea" rows="2" placeholder="Jelaskan akar penyebab masalah teknis/non-teknis..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="logActionPlan">Rencana Tindakan (Action Plan / Solusi)</label>
+              <textarea id="logActionPlan" class="form-textarea" rows="2" placeholder="Langkah konkrit yang sedang/akan dilakukan oleh PIC..."></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="logTargetDate">Target Selesai Solusi</label>
+                <input type="date" id="logTargetDate" class="form-input" value="2026-10-30">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="logStatus">Status Penanganan Solusi</label>
+                <select id="logStatus" class="form-select">
+                  <option value="open">Open (Baru Teridentifikasi)</option>
+                  <option value="in_progress">In Progress (Dalam Penanganan)</option>
+                  <option value="resolved">Resolved (Sudah Teratasi)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- MODAL PANE 3: GENERAL & PM NOTES -->
+          <div id="modal-pane-general" class="modal-pane">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="prodName">Nama Produk *</label>
+                <input type="text" id="prodName" class="form-input" required placeholder="Contoh: AURA (Ganti Nama)">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="prodCode">Kode Produk</label>
+                <input type="text" id="prodCode" class="form-input" placeholder="Contoh: RN-AUR-01">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="prodWave">Kategori Wave Peluncuran *</label>
+                <select id="prodWave" class="form-select" required>
+                  <option value="wave1">Wave 1 (Quick Wins / Bahan Ready)</option>
+                  <option value="wave2">Wave 2 (Mid-Term / Riset Formulasi/Filler)</option>
+                  <option value="wave3">Wave 3 (Long-Term / Full R&D Supplier 3)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="prodStage">Tahap Pekerjaan Saat Ini *</label>
+                <select id="prodStage" class="form-select" required>
+                  <option value="rebranding">Penentuan Nama & Rebranding</option>
+                  <option value="riset">Riset & Formulasi (Bahan/Aroma/Filler/Kemasan)</option>
+                  <option value="uji_lab">Uji Laboratorium (Max 2 Bln)</option>
+                  <option value="bpom_halal">Perijinan BPOM TR & Halal</option>
+                  <option value="kemasan">Desain & Packaging Ready</option>
+                  <option value="ready_prod">Ready to Produce / Launch</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="prodPic">PIC / Penanggung Jawab *</label>
+                <select id="prodPic" class="form-select" required>
+                  <option value="pt_agro">PT Agro Sehat Nusantara</option>
+                  <option value="pihak_3">Supplier Pihak Ke-3</option>
+                  <option value="pt_runa">Internal RUNA Wellness</option>
+                  <option value="joint">Joint Team (PT Agro & Pihak 3)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="prodRiskLevel">Tingkat Risiko (Risk Level) *</label>
+                <select id="prodRiskLevel" class="form-select" required>
+                  <option value="low">Low Risk (Lancar)</option>
+                  <option value="medium">Medium Risk (Perlu Keputusan/Follow-up)</option>
+                  <option value="high">High Risk (Tertahan/Kendala Bahan)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="prodRawMaterial">Status Bahan Baku</label>
+              <input type="text" id="prodRawMaterial" class="form-input" placeholder="Contoh: Ready 100% / Perlu Diriset Supplier Pihak 3">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="prodResearchFocus">Fokus Pekerjaan / Riset</label>
+              <input type="text" id="prodResearchFocus" class="form-input" placeholder="Contoh: Riset variasi aroma oleh Pihak 3 & PT Agro">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="prodNotes">Catatan PM & Keputusan Owner</label>
+              <textarea id="prodNotes" class="form-textarea" rows="2" placeholder="Catatan hasil diskusi dengan Owner..."></textarea>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-runa btn-modal-cancel">Batal</button>
+          <button type="submit" class="btn btn-runa-blush"><i class="fas fa-save"></i> Simpan Semua Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast" class="toast">
+    <i class="fas fa-check-circle" style="font-size:18px;"></i>
+    <span class="toast-message">Pesan notifikasi</span>
+  </div>
+
+  <!-- JavaScript Modules -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
